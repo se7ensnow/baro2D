@@ -10,7 +10,23 @@ FetchContent_Declare(SFML
     GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(baro2D src/main.cpp)
+add_executable(baro2D
+        src/main.cpp
+        src/game.cpp
+        src/game.h
+        Entities/sub.cpp
+        Entities/sub.h
+        src/headers.h
+        States/state.cpp
+        States/state.h
+        States/game_state.cpp
+        States/game_state.h
+        Entities/entity.cpp
+        Entities/entity.h
+        States/main_menu_state.cpp
+        States/main_menu_state.h
+        UI/button.cpp
+        UI/button.h)
 target_link_libraries(baro2D PRIVATE sfml-graphics)
 target_compile_features(baro2D PRIVATE cxx_std_17)
 
