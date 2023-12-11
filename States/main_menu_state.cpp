@@ -8,7 +8,7 @@ MainMenuState::MainMenuState(sf::RenderWindow* window,
     initBackground();
     initFonts();
     initKeybinds();
-    initButtons();
+    initGui();
 }
 
 MainMenuState::~MainMenuState() {
@@ -49,28 +49,43 @@ void MainMenuState::initKeybinds() {
 
         ifs.close();
     } else {
-        std::cerr << "ERROR::GAME_STATE::Could not load keybinds!" << std::endl;
+        std::cerr << "ERROR::MAINMENUSTATE::Could not load keybinds!" << std::endl;
     }
 }
 
-void MainMenuState::initButtons() {
-    buttons_["GAME_STATE"] = new Button(100, 100, 150, 50,
-                               &font_, "New Game",
-                               sf::Color(70, 70, 70, 200),
-                               sf::Color(150, 150, 150, 255),
-                               sf::Color(20, 20, 20, 200));
+void MainMenuState::initGui() {
+    buttons_["GAME_STATE"] = new Button(110, 300, 250, 50,
+                                        &font_, "New Game", 50,
+                                        sf::Color(70, 70, 70, 200),
+                                        sf::Color(250, 250, 250, 250),
+                                        sf::Color(20, 20, 20, 50),
+                                        sf::Color(70, 70, 70, 0),
+                                        sf::Color(150, 150, 150, 0),
+                                        sf::Color(20, 20, 20, 0));
 
-    buttons_["EXIT_STATE"] = new Button(100, 300, 150, 50,
-                                        &font_, "Quit",
-                                        sf::Color(100, 100, 100, 200),
-                                        sf::Color(150, 150, 150, 255),
-                                        sf::Color(20, 20, 20, 200));
+    buttons_["SETTINGS_STATE"] = new Button(110, 400, 250, 50,
+                                        &font_, "Settings", 50,
+                                        sf::Color(70, 70, 70, 200),
+                                        sf::Color(250, 250, 250, 250),
+                                        sf::Color(20, 20, 20, 50),
+                                            sf::Color(70, 70, 70, 0),
+                                            sf::Color(150, 150, 150, 0),
+                                            sf::Color(20, 20, 20, 0));
+
+    buttons_["EXIT_STATE"] = new Button(110, 550, 250, 50,
+                                        &font_, "Quit", 50,
+                                        sf::Color(70, 70, 70, 200),
+                                        sf::Color(250, 250, 250, 250),
+                                        sf::Color(20, 20, 20, 50),
+                                        sf::Color(70, 70, 70, 0),
+                                        sf::Color(150, 150, 150, 0),
+                                        sf::Color(20, 20, 20, 0));
 }
 
 void MainMenuState::update(const float& dt) {
     updateMousePositions();
     updateInput(dt);
-    updateButtons();
+    updateGui();
 }
 
 void MainMenuState::render(sf::RenderTarget* target) {
@@ -79,21 +94,21 @@ void MainMenuState::render(sf::RenderTarget* target) {
     }
 
     target->draw(background_);
-    renderButtons(target);
+    renderGui(target);
 
-    // sf::Text mouseText;
-    // mouseText.setPosition(mousePosView_.x, mousePosView_.y - 50);
-    // mouseText.setFont(font_);
-    // mouseText.setCharacterSize(12);
-    // mouseText.setString(std::to_string(mousePosView_.x) + " " + std::to_string(mousePosView_.y));
-    // target->draw(mouseText);
+    sf::Text mouseText;
+    mouseText.setPosition(mousePosView_.x, mousePosView_.y - 50);
+    mouseText.setFont(font_);
+    mouseText.setCharacterSize(12);
+    mouseText.setString(std::to_string((int)mousePosView_.x) + " " + std::to_string((int)mousePosView_.y));
+    target->draw(mouseText);
 }
 
 void MainMenuState::updateInput(const float &dt) {
 
 }
 
-void MainMenuState::updateButtons() {
+void MainMenuState::updateGui() {
     for (auto& it : buttons_) {
         it.second->update(mousePosView_);
     }
@@ -102,12 +117,16 @@ void MainMenuState::updateButtons() {
         states_->push(new GameState(window_, supportedKeys_, states_));
     }
 
+    if (buttons_["SETTINGS_STATE"]->isPressed()) {
+        states_->push(new SettingsState(window_, supportedKeys_, states_));
+    }
+
     if (buttons_["EXIT_STATE"]->isPressed()) {
         endState();
     }
 }
 
-void MainMenuState::renderButtons(sf::RenderTarget *target) {
+void MainMenuState::renderGui(sf::RenderTarget *target) {
     for (auto& it : buttons_) {
         it.second->render(target);
     }

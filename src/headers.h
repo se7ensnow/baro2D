@@ -2,12 +2,19 @@
 
 #include <iostream>
 #include <ctime>
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <stack>
 #include <map>
+#include <random>
+#include <unordered_map>
+#include <array>
+#include <memory>
+#include <queue>
+#include <algorithm>
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>

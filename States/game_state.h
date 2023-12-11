@@ -1,6 +1,9 @@
 #pragma once
 
 #include "state.h"
+#include "../UI/pause_menu.h"
+#include "../Map/map.h"
+
 
 class GameState : public State {
 public:
@@ -14,8 +17,19 @@ public:
 
 protected:
     void initKeybinds() override;
+    void initFonts();
+    void initTextures();
+    void initPauseMenu();
+    void initSub();
+    void initMap();
+    void updatePlayerInput(const float& dt);
     void updateInput(const float& dt) override;
+    void updatePauseMenuGui();
 
 protected:
-    Entity player_;
+    sf::Font font_;
+    PauseMenu* pmenu_;
+
+    Sub* sub_;
+    Map* map_;
 };

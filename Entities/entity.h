@@ -1,25 +1,27 @@
 #pragma once
 
-#include "../src/headers.h"
+#include "../Components/hitbox_component.h"
 
 class Entity {
 public:
     Entity();
     virtual ~Entity();
 
-    void createSprite(sf::Texture* texture);
-
-    virtual void move(const float& dt, const float& dir_x, const float& dir_y);
+    virtual void setPosition(float x, float y);
+    virtual void move(const float& dir_x, const float& dir_y, const float& dt) = 0;
 
     virtual void update(const float& dt);
     virtual void render(sf::RenderTarget* target);
 
 protected:
-    void initVariables();
+    virtual void initVariables();
+    void setTexture(sf::Texture& texture);
+    void createHitboxComponent(sf::Sprite& sprite,
+                               float offset_x, float offset_y,
+                               float width, float height);
 
 protected:
-    sf::Texture* texture_;
-    sf::Sprite* sprite_;
+    sf::Sprite sprite_;
 
-    float speed_;
+    HitboxComponent* hitboxComponent_;
 };

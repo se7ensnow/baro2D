@@ -83,8 +83,6 @@ void Game::initStates() {
 }
 
 void Game::update() {
-    updateSFMLEvents();
-
     if (!states_.empty()) {
         states_.top()->update(deltaTime_);
 
@@ -98,6 +96,7 @@ void Game::update() {
         endApplication();
         window_->close();
     }
+    updateSFMLEvents();
 }
 
 void Game::render() {
@@ -122,5 +121,10 @@ void Game::updateDeltaTime() {
 }
 
 void Game::updateSFMLEvents() {
-
+    while (window_->pollEvent(sfEvent_)) {
+        if (sfEvent_.type == sf::Event::Closed) {
+            endApplication();
+            window_->close();
+        }
+    }
 }

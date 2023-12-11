@@ -1,24 +1,25 @@
 #pragma once
 
-#include "../src/headers.h"
+#include "entity.h"
+#include "../Components/movement_component.h"
 
-class Sub {
+class Sub : public Entity {
 public:
-    Sub();
+    Sub(float x, float y, sf::Texture& texture);
     ~Sub();
-    void update();
-    void render(sf::RenderTarget& target);
+
+    void move(const float& dir_x, const float& dir_y, const float& dt) override;
+
+    void update(const float& dt) override;
 
 protected:
-    void initTexture();
-    void initSprite();
-    void updatePosition();
+    void initVariables() override;
+    void createMovementComponent(sf::Sprite& sprite,
+                                 float maxAccelerationX, float maxAccelerationY,
+                                 float pumpSpeed,
+                                 float decelerationCoef);
+    void initComponents();
 
 protected:
-    sf::Texture textureSheet_;
-    sf::Sprite sprite_;
-
-    sf::Vector2f position_;
-    sf::Vector2f speed_;
-    sf::Vector2f accel_;
+    MovementComponent* movementComponent_;
 };
