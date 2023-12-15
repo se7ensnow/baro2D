@@ -4,8 +4,10 @@ Sub::Sub(float x, float y,
          sf::Texture& texture, float scale,
          sf::RenderWindow& window, const Map& map,
          sf::Font& font, sf::Font& secondFont,
-         sf::SoundBuffer& buffer)
-: map_(map), font_(font), secondFont_(secondFont), buffer_(buffer) {
+         sf::SoundBuffer& buffer,
+         const std::map<std::string, int>& keybinds,
+         sf::Texture& robotTexture)
+: map_(map), font_(font), secondFont_(secondFont), buffer_(buffer), keybinds_(keybinds) {
     Sub::initVariables();
 
     setPosition(x, y);
@@ -17,7 +19,7 @@ Sub::Sub(float x, float y,
     windowSize_ = window.getSize();
 
     initBreakables();
-    initRobots();
+    initRobots(robotTexture);
     initComponents();
     initUI();
     initSound();
@@ -145,31 +147,6 @@ void Sub::initButtons() {
     breakablesUI_["PUMPS"].setCharacterSize(40);
     breakablesUI_["PUMPS"].setFillColor(sf::Color::Green);
     breakablesUI_["PUMPS"].setString("Pumps working");
-
-    buttons_["REACTOR"] = std::make_unique<Button>(breakablesUI_["REACTOR"], sf::Color(0, 200, 0, 200));
-    buttons_["ENGINE"] = std::make_unique<Button>(breakablesUI_["ENGINE"], sf::Color(0, 200, 0, 200));
-    buttons_["SONAR"] = std::make_unique<Button>(breakablesUI_["SONAR"], sf::Color(0, 200, 0, 200));
-    buttons_["SENSORS"] = std::make_unique<Button>(breakablesUI_["SENSORS"], sf::Color(0, 200, 0, 200));
-    buttons_["HULL"] = std::make_unique<Button>(breakablesUI_["HULL"], sf::Color(0, 200, 0, 200));
-    buttons_["PUMPS"] = std::make_unique<Button>(breakablesUI_["PUMPS"], sf::Color(0, 200, 0, 200));
-
-    buttons_["ROBOT_1"] = std::make_unique<Button>(110, 300, 250, 50,
-                                                      &font_, "New Game", 50,
-                                                      sf::Color(70, 70, 70, 200),
-                                                      sf::Color(250, 250, 250, 250),
-                                                      sf::Color(20, 20, 20, 50),
-                                                      sf::Color(70, 70, 70, 0),
-                                                      sf::Color(150, 150, 150, 0),
-                                                      sf::Color(20, 20, 20, 0));
-
-    buttons_["ROBOT_2"] = std::make_unique<Button>(110, 300, 250, 50,
-                                                      &font_, "New Game", 50,
-                                                      sf::Color(70, 70, 70, 200),
-                                                      sf::Color(250, 250, 250, 250),
-                                                      sf::Color(20, 20, 20, 50),
-                                                      sf::Color(70, 70, 70, 0),
-                                                      sf::Color(150, 150, 150, 0),
-                                                      sf::Color(20, 20, 20, 0));
 }
 
 void Sub::initBreakables() {
@@ -180,15 +157,15 @@ void Sub::initBreakables() {
     breakables_["HULL"] = 0;
     breakables_["PUMPS"] = 0;
 
-    repairTimers_["REACTOR"] = 3.f;
-    repairTimers_["ENGINE"] = 3.f;
-    repairTimers_["SONAR"] = 2.f;
-    repairTimers_["SENSORS"] = 5.f;
-    repairTimers_["HULL"] = 1.f;
-    repairTimers_["PUMPS"] = 3.f;
+    repairTimers_["REACTOR"] = 6.f;
+    repairTimers_["ENGINE"] = 4.f;
+    repairTimers_["SONAR"] = 4.f;
+    repairTimers_["SENSORS"] = 10.f;
+    repairTimers_["HULL"] = 3.f;
+    repairTimers_["PUMPS"] = 4.f;
 
     reactorTimer_ = 0.f;
-    reactorMaxTimer_ = 7.f;
+    reactorMaxTimer_ = 10.f;
     lost_ = false;
 
     hullMaxTimer_ = 2.f;
@@ -200,9 +177,9 @@ void Sub::initBreakables() {
     maxAlarmTimer_ = 0.33f;
 }
 
-void Sub::initRobots() {
-    robots_.emplace_back("AVAILABLE");
-    robots_.emplace_back("AVAILABLE");
+void Sub::initRobots(sf::Texture& robotTexture) {
+    robots_.emplace_back("AVAILABLE", robotTexture, secondFont_);
+    robots_.emplace_back("AVAILABLE", robotTexture, secondFont_);
 }
 
 void Sub::setPosition(float x, float y) {
@@ -263,6 +240,7 @@ void Sub::render(sf::RenderTarget* target) {
     hitboxComponent_->render(target);
     renderUI(target);
     renderButtons(target);
+    renderRobots(target);
 }
 
 void Sub::updateUI() {
@@ -294,14 +272,26 @@ void Sub::updateUI() {
 }
 
 void Sub::updateButtons(const sf::Vector2f& mousePos) {
-    for (auto& it : buttons_) {
-        it.second->update(mousePos);
+    for (auto& it : breakablesUI_) {
+        if (it.second.getGlobalBounds().contains(mousePos)) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key(keybinds_.at("SELECT_LEFT"))) &&
+                robots_[1].state_ != it.first) {
+                robots_[0].state_ = it.first;
+                robots_[0].maxTimer_ = repairTimers_[robots_[0].state_];
+                robots_[0].curTimer_ = 0;
+            } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key(keybinds_.at("SELECT_RIGHT"))) &&
+                robots_[0].state_ != it.first) {
+                robots_[1].state_ = it.first;
+                robots_[1].maxTimer_ = repairTimers_[robots_[1].state_];
+                robots_[1].curTimer_ = 0;
+            }
+        }
     }
 }
 
 void Sub::renderButtons(sf::RenderTarget* target) {
-    for (auto& it : buttons_) {
-        it.second->render(target);
+    for (auto& it : breakablesUI_) {
+        target->draw(it.second);
     }
     if (alarmTimer_ >= maxAlarmTimer_) {
         target->draw(background_);
@@ -331,6 +321,18 @@ void Sub::updateBreakables(const float& dt) {
         breakables_["REACTOR"] = 1;
         reactorAlarm_.play();
     }
+    if (pseudoRandom_() % 50000 <= 1 && breakables_["ENGINE"] == 0) {
+        breakables_["ENGINE"] = 1;
+    }
+    if (pseudoRandom_() % 50000 <= 1 && breakables_["SONAR"] == 0) {
+        breakables_["SONAR"] = 1;
+    }
+    if (pseudoRandom_() % 50000 <= 1 && breakables_["SENSORS"] == 0) {
+        breakables_["SENSORS"] = 1;
+    }
+    if (pseudoRandom_() % 50000 <= 1 && breakables_["PUMPS"] == 0) {
+        breakables_["PUMPS"] = 1;
+    }
     for (size_t i = 0 ; i < 2; ++i) {
         robots_[i].curTimer_ += dt;
         if (robots_[i].curTimer_ >= robots_[i].maxTimer_) {
@@ -342,9 +344,31 @@ void Sub::updateBreakables(const float& dt) {
             robots_[i].state_ = "AVAILABLE";
         }
     }
+    if (robots_[0].state_ == "AVAILABLE") {
+        robots_[0].robotSprite_.setPosition(50, 800);
+    } else {
+        robots_[0].robotSprite_.setPosition(sf::Vector2f(0,breakablesUI_[robots_[0].state_].getPosition().y));
+        robots_[0].timer_.setPosition(sf::Vector2f(10,
+                                                   breakablesUI_[robots_[0].state_].getPosition().y +
+                                                   robots_[0].robotSprite_.getGlobalBounds().height));
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(2) << robots_[0].maxTimer_ - robots_[0].curTimer_;
+        robots_[0].timer_.setString(ss.str());
+    }
+    if (robots_[1].state_ == "AVAILABLE") {
+        robots_[1].robotSprite_.setPosition(150, 800);
+    } else {
+        robots_[1].robotSprite_.setPosition(sf::Vector2f(0,breakablesUI_[robots_[1].state_].getPosition().y));
+        robots_[1].timer_.setPosition(sf::Vector2f(10,
+                                                   breakablesUI_[robots_[1].state_].getPosition().y +
+                                                   robots_[1].robotSprite_.getGlobalBounds().height));
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(2) << robots_[1].maxTimer_ - robots_[1].curTimer_;
+        robots_[1].timer_.setString(ss.str());
+    }
     if (breakables_["REACTOR"] > 0) {
-        buttons_["REACTOR"]->setTextColor(sf::Color(200, 0, 0, 200));
-        buttons_["REACTOR"]->setText("Reactor overheating");
+        breakablesUI_["REACTOR"].setFillColor(sf::Color::Red);
+        breakablesUI_["REACTOR"].setString("Reactor overheating");
         reactorTimer_ += dt;
         alarmTimer_ += dt;
         if (alarmTimer_ >= maxAlarmTimer_ * 2) {
@@ -353,26 +377,53 @@ void Sub::updateBreakables(const float& dt) {
         if (reactorTimer_ >= reactorMaxTimer_) {
             lost_ = true;
         }
+    } else {
+        breakablesUI_["REACTOR"].setFillColor(sf::Color::Green);
+        breakablesUI_["REACTOR"].setString("Reactor working");
     }
     if (breakables_["ENGINE"] > 0) {
-        buttons_["ENGINE"]->setTextColor(sf::Color(200, 0, 0, 200));
-        buttons_["ENGINE"]->setText("Engine broken");
+        breakablesUI_["ENGINE"].setFillColor(sf::Color::Red);
+        breakablesUI_["ENGINE"].setString("Engine broken");
+    } else {
+        breakablesUI_["ENGINE"].setFillColor(sf::Color::Green);
+        breakablesUI_["ENGINE"].setString("Engine running");
     }
     if (breakables_["SONAR"] > 0) {
-        buttons_["SONAR"]->setTextColor(sf::Color(200, 0, 0, 200));
-        buttons_["SONAR"]->setText("Sonar broken");
+        breakablesUI_["SONAR"].setFillColor(sf::Color::Red);
+        breakablesUI_["SONAR"].setString("Sonar broken");
+    } else {
+        breakablesUI_["SONAR"].setFillColor(sf::Color::Green);
+        breakablesUI_["SONAR"].setString("Sonar working");
     }
     if (breakables_["SENSORS"] > 0) {
-        buttons_["SENSORS"]->setTextColor(sf::Color(200, 0, 0, 200));
-        buttons_["SENSORS"]->setText("Sensors broken");
+        breakablesUI_["SENSORS"].setFillColor(sf::Color::Red);
+        breakablesUI_["SENSORS"].setString("Sensors broken");
+    } else {
+        breakablesUI_["SENSORS"].setFillColor(sf::Color::Green);
+        breakablesUI_["SENSORS"].setString("Sensors working");
     }
     if (breakables_["HULL"] > 0) {
-        buttons_["HULL"]->setTextColor(sf::Color(200, 0, 0, 200));
-        buttons_["HULL"]->setText("Hull breaches: " + std::to_string(breakables_["HULL"]));
+        breakablesUI_["HULL"].setFillColor(sf::Color::Red);
+        breakablesUI_["HULL"].setString("Hull breaches: " + std::to_string(breakables_["HULL"]));
+    } else {
+        breakablesUI_["HULL"].setFillColor(sf::Color::Green);
+        breakablesUI_["HULL"].setString("Hull is intact");
     }
     if (breakables_["PUMPS"] > 0) {
-        buttons_["PUMPS"]->setTextColor(sf::Color(200, 0, 0, 200));
-        buttons_["PUMPS"]->setText("Pumps broken");
+        breakablesUI_["PUMPS"].setFillColor(sf::Color::Red);
+        breakablesUI_["PUMPS"].setString("Pumps broken");
+    } else {
+        breakablesUI_["PUMPS"].setFillColor(sf::Color::Green);
+        breakablesUI_["PUMPS"].setString("Pumps working");
+    }
+}
+
+void Sub::renderRobots(sf::RenderTarget* target) {
+    for (size_t i = 0; i < 2; ++i) {
+        target->draw(robots_[i].robotSprite_);
+        if (robots_[i].state_ != "AVAILABLE") {
+            target->draw(robots_[i].timer_);
+        }
     }
 }
 

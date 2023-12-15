@@ -12,14 +12,23 @@ public:
         std::string state_ = "AVAILABLE";
         float curTimer_ = 0;
         float maxTimer_ = 0;
-        Robot(std::string state) : state_(std::move(state)) {};
+        sf::Sprite robotSprite_;
+        sf::Text timer_;
+        Robot(std::string state, sf::Texture& texture, sf::Font& font) : state_(std::move(state)) {
+            robotSprite_.setTexture(texture);
+            robotSprite_.setScale(0.05f, 0.05f);
+            timer_.setCharacterSize(10);
+            timer_.setFont(font);
+        };
     };
 public:
     Sub(float x, float y,
         sf::Texture& texture, float scale,
         sf::RenderWindow& window, const Map& map,
         sf::Font& font, sf::Font& secondFont,
-        sf::SoundBuffer& buffer);
+        sf::SoundBuffer& buffer,
+        const std::map<std::string, int>& keybinds,
+        sf::Texture& robotTexture);
     ~Sub();
 
     sf::Vector2f getPosition() const;
@@ -38,7 +47,7 @@ protected:
     void initSound();
     void initButtons();
     void initBreakables();
-    void initRobots();
+    void initRobots(sf::Texture& robotTexture);
     void setPosition(float x, float y);
     void createMovementComponent(sf::Sprite& sprite,
                                  float maxAccelerationX, float maxAccelerationY,
@@ -51,12 +60,15 @@ protected:
     void updateButtons(const sf::Vector2f& mousePos);
     void renderButtons(sf::RenderTarget* target);
     void updateBreakables(const float& dt);
+    void renderRobots(sf::RenderTarget* target);
 
 protected:
     std::unique_ptr<MovementComponent> movementComponent_;
     std::unique_ptr<HitboxComponent> hitboxComponent_;
 
     sf::Vector2f position_;
+
+    const std::map<std::string, int>& keybinds_;
 
     const Map& map_;
 

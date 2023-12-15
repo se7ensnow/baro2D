@@ -51,6 +51,9 @@ void GameState::initTextures() {
     if (!textures_["ARROW"].loadFromFile("../../Resources/Images/Sprites/Sonar/arrow_texture.png")) {
         std::cerr <<"ERROR::GAMESTATE::Could not load arrow texture!" <<std::endl;
     }
+    if (!textures_["ROBOT"].loadFromFile("../../Resources/Images/Sprites/Sub/robot_texture.png")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load robot texture!" <<std::endl;
+    }
 }
 
 void GameState::initSounds() {
@@ -118,7 +121,9 @@ void GameState::initSub() {
                                  textures_["SUBMARINE_IDLE"], 0.1f,
                                  *window_, *map_,
                                  font_, secondFont_,
-                                 sounds_["REACTOR_ALARM"]);
+                                 sounds_["REACTOR_ALARM"],
+                                 keybinds_,
+                                 textures_["ROBOT"]);
 }
 
 void GameState::initControl() {
