@@ -5,6 +5,7 @@
 #include "entity.h"
 #include "../Components/movement_component.h"
 #include "../UI/gui.h"
+#include "../Utils/sf_math.h"
 
 class Sub {
 public:
@@ -71,6 +72,7 @@ protected:
     const std::map<std::string, int>& keybinds_;
 
     const Map& map_;
+    sf::Vector2f finish_;
 
     sf::Sprite sprite_;
 

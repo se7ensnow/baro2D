@@ -10,6 +10,8 @@ Sub::Sub(float x, float y,
 : map_(map), font_(font), secondFont_(secondFont), buffer_(buffer), keybinds_(keybinds) {
     Sub::initVariables();
 
+    finish_ = sf::Vector2f(static_cast<float>(map_.getFinish().x) * map_.getSquareSize(),
+                           static_cast<float>(map_.getFinish().y) * map_.getSquareSize());
     setPosition(x, y);
 
     initSprite(texture,
@@ -230,6 +232,11 @@ void Sub::update(const float &dt, const sf::Vector2f& mousePos) {
         movementComponent_->resetVelocity();
         hitboxComponent_->update();
     }
+
+    if (math::getLengthSqr(finish_ - position_) <= map_.getSquareSize() * map_.getSquareSize()) {
+        lost_ = true;
+    }
+
     updateUI();
     updateButtons(mousePos);
     updateBreakables(dt);
@@ -237,7 +244,7 @@ void Sub::update(const float &dt, const sf::Vector2f& mousePos) {
 
 void Sub::render(sf::RenderTarget* target) {
     target->draw(sprite_);
-    hitboxComponent_->render(target);
+    // hitboxComponent_->render(target);
     renderUI(target);
     renderButtons(target);
     renderRobots(target);
@@ -324,10 +331,10 @@ void Sub::updateBreakables(const float& dt) {
     if (pseudoRandom_() % 50000 <= 1 && breakables_["ENGINE"] == 0) {
         breakables_["ENGINE"] = 1;
     }
-    if (pseudoRandom_() % 50000 <= 1 && breakables_["SONAR"] == 0) {
+    if (pseudoRandom_() % 10000 <= 1 && breakables_["SONAR"] == 0) {
         breakables_["SONAR"] = 1;
     }
-    if (pseudoRandom_() % 50000 <= 1 && breakables_["SENSORS"] == 0) {
+    if (pseudoRandom_() % 5000 <= 1 && breakables_["SENSORS"] == 0) {
         breakables_["SENSORS"] = 1;
     }
     if (pseudoRandom_() % 50000 <= 1 && breakables_["PUMPS"] == 0) {

@@ -231,14 +231,12 @@ void Sonar::updateWave(const float& dt) {
     if (waveTimer_ >= maxWaveTimer_ && !sub_.breakSonarSignal()) {
         curWaveRadius_ = 0;
         waveTimer_ = 0;
-        std::cout <<"SOUND" <<std::endl;
         sonarWaveSounds_[pseudoRandom_() % sonarWaveSounds_.size()].play();
     }
     prevWaveRadius_ = curWaveRadius_;
     if (curWaveRadius_ < radius_ + mapSquareSize_) {
         curWaveRadius_ += dt * waveSpeed_;
     }
-    std::cout <<curWaveRadius_ <<" " <<sonarWave_.getPosition().x <<" " <<sonarWave_.getPosition().y <<std::endl;
     sonarWave_.setRadius(curWaveRadius_);
     sonarWave_.setPosition(centre_.x + radius_ - curWaveRadius_, centre_.y  + radius_  - curWaveRadius_);
 }
