@@ -4,14 +4,18 @@
 
 class MovementComponent {
 public:
-    MovementComponent(sf::Sprite& sprite,
-                      float maxAccelerationX, float maxAccelerationY,
-                      float pumpSpeed,
-                      float decelerationCoef);
+    MovementComponent(float maxAccelerationX, float maxAccelerationY,
+                      float pumpSpeed, float hullSpeed,
+                      float decelerationCoef,
+                      std::map<std::string, uint16_t>& breakables);
     ~MovementComponent();
 
-    void move(float dir_x, float dir_y, const float& dt);
-    void update(const float& dt);
+    void resetVelocity();
+    sf::Vector2f getVelocity() const;
+    float getCurBallastLevel() const;
+
+    void move(const sf::Vector2f& dir, const float& dt);
+    sf::Vector2f update(const float& dt);
 
 protected:
     void initVariables();
@@ -19,8 +23,6 @@ protected:
     void updateVelocity(const float& dt);
 
 protected:
-    sf::Sprite& sprite_;
-
     float maxAccelerationX_;
     float maxAccelerationY_;
     float decelerationCoef_;
@@ -28,7 +30,10 @@ protected:
     float curBallastLevel_;
     float desiredBallastLevel_;
     float pumpSpeed_;
+    float hullSpeed_;
 
     sf::Vector2f velocity_;
     sf::Vector2f acceleration_;
+
+    std::map<std::string, uint16_t>& breakables_;
 };

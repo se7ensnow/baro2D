@@ -38,9 +38,15 @@ add_executable(baro2D
         States/settings_state.cpp
         States/settings_state.h
         Map/map.cpp
-        Map/map.h)
+        Map/map.h
+        Controls/control.cpp
+        Controls/control.h
+        UI/sonar.cpp
+        UI/sonar.h
+        Utils/sf_math.h
+        Utils/sf_shapes.h)
 
-target_link_libraries(baro2D PRIVATE sfml-graphics)
+target_link_libraries(baro2D PRIVATE sfml-graphics sfml-audio sfml-system sfml-window sfml-network)
 target_compile_features(baro2D PRIVATE cxx_std_17)
 
 if(WIN32)

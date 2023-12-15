@@ -16,6 +16,16 @@ public:
            sf::Color outlineHoverColor = sf::Color::Transparent,
            sf::Color outlineActiveColor = sf::Color::Transparent,
            uint16_t id = 0);
+    Button(const sf::Text& text,
+           sf::Color textIdleColor,
+           sf::Color idleColor = sf::Color::Transparent,
+           sf::Color hoverColor = sf::Color::Transparent,
+           sf::Color activeColor = sf::Color::Transparent,
+           sf::Color outlineIdleColor = sf::Color::Transparent,
+           sf::Color outlineHoverColor = sf::Color::Transparent,
+           sf::Color outlineActiveColor = sf::Color::Transparent,
+           uint16_t id = 0);
+
     ~Button();
 
     bool isPressed() const;
@@ -23,6 +33,7 @@ public:
     const uint16_t& getId() const;
 
     void setText(const std::string& text);
+    void setTextColor(sf::Color textIdleColor);
     void setId(uint16_t id);
 
     void update(const sf::Vector2f& mousePos);

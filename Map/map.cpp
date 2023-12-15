@@ -3,8 +3,24 @@
 #include <utility>
 
 
-Map::Map(int32_t width, int32_t height, float squareSize, int32_t randomFillPercent, int32_t smoothAmount)
+Map::Map(int32_t width, int32_t height, float squareSize,
+         int32_t startX, int32_t startY,
+         int32_t finishX, int32_t finishY,
+         int32_t randomFillPercent)
 : width_(width), height_(height), squareSize_(squareSize) {
+    start_ = sf::Vector2i(startX, startY);
+    finish_ = sf::Vector2i(finishX, finishY);
+
+    startMark_.setSize(sf::Vector2f(squareSize_ / 2.f, squareSize_ / 2.f));
+    startMark_.setPosition(static_cast<float>(startX) * squareSize_ + squareSize_ / 4.f,
+                           static_cast<float>(startY) * squareSize_ + squareSize_ / 4.f);
+    startMark_.setFillColor(sf::Color::Green);
+
+    finishMark_.setSize(sf::Vector2f(squareSize_ / 2.f, squareSize_ / 2.f));
+    finishMark_.setPosition(static_cast<float>(finishX) * squareSize_ + squareSize_ / 4.f,
+                            static_cast<float>(finishY) * squareSize_ + squareSize_ / 4.f);
+    finishMark_.setFillColor(sf::Color::Red);
+
     squares_.resize(width_ * height_, sf::RectangleShape());
     map_.resize(height_);
     mapFlags_.resize(height_);
@@ -16,7 +32,7 @@ Map::Map(int32_t width, int32_t height, float squareSize, int32_t randomFillPerc
             squares_[y * width_ + x].setSize(sf::Vector2f(squareSize_, squareSize_));
         }
     }
-    generateMap(randomFillPercent, smoothAmount);
+    generateMap(randomFillPercent, startX, startY, finishX, finishY);
 }
 
 Map::~Map() {
@@ -25,6 +41,18 @@ Map::~Map() {
 
 const std::string &Map::getSeed() const {
     return seed_;
+}
+
+sf::Vector2i Map::getSize() const {
+    return {width_, height_};
+}
+
+float Map::getSquareSize() const {
+    return squareSize_;
+}
+
+sf::Vector2i Map::getFinish() const {
+    return finish_;
 }
 
 bool Map::isInMapRange(int32_t x, int32_t y) const {
@@ -71,9 +99,15 @@ void Map::randomFillMap(int32_t randomFillPercent, bool useRandomSeed) {
     }
 }
 
-void Map::generateMap(int32_t randomFillPercent, int32_t smoothAmount, bool useRandomSeed, std::string seed) {
+void Map::generateMap(int32_t randomFillPercent,
+                      int32_t startX, int32_t startY,
+                      int32_t finishX, int32_t finishY,
+                      bool useRandomSeed, std::string seed) {
     seed_ = std::move(seed);
     randomFillMap(randomFillPercent, useRandomSeed);
+
+    drawCircle(Coord(startX, startY), 7);
+    drawCircle(Coord(finishX, finishY), 7);
 
     for (int32_t i = 0; i < 4; ++i) {
         smoothMap(true);
@@ -92,8 +126,9 @@ void Map::smoothMap(bool closingAreas) {
         for (int32_t x = 0; x < width_; ++x) {
             int32_t neighborWallTiles = getSurroundingWallCount(x, y, 1);
             int32_t secNeighborWallTiles = getSurroundingWallCount(x, y, 2);
-
-            if (neighborWallTiles > 4 || (secNeighborWallTiles < 3 && closingAreas)) {
+            if (neighborWallTiles > 4 || (secNeighborWallTiles < 3 && closingAreas &&
+            (x - start_.x)*(x - start_.x) + (y - start_.y)*(y - start_.y) > 49 &&
+            (x - finish_.x)*(x - finish_.x) + (y - finish_.y)*(y - finish_.y) > 49)) {
                 map_temp[y][x] = 1;
             } else if (neighborWallTiles < 4) {
                 map_temp[y][x] = 0;
@@ -187,6 +222,13 @@ void Map::render(sf::RenderTarget* target) {
             target->draw(squares_[y * width_ + x]);
         }
     }
+
+    target->draw(startMark_);
+    target->draw(finishMark_);
+}
+
+const std::vector<uint16_t>& Map::operator[](size_t n) const {
+    return map_[n];
 }
 
 void Map::connectClosestRooms(std::vector<std::shared_ptr<Room>>& allRooms, bool forceAccessibilityFromMainRoom) {

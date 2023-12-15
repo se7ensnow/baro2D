@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Entities/sub.h"
+#include "../Entities/entity.h"
 
 class State {
 public:
@@ -36,4 +36,5 @@ protected:
     sf::Vector2f mousePosView_;
 
     std::map<std::string, sf::Texture> textures_;
+    std::map<std::string, sf::SoundBuffer> sounds_;
 };

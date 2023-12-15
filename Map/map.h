@@ -38,20 +38,32 @@ public:
         bool isAccessibleFromMainRoom_;
     };
 public:
-    Map(int32_t width, int32_t height, float squareSize, int32_t randomFillPercent, int32_t smoothAmount);
+    Map(int32_t width, int32_t height, float squareSize,
+        int32_t startX, int32_t startY,
+        int32_t finishX, int32_t finishY,
+        int32_t randomFillPercent);
     ~Map();
 
     const std::string& getSeed() const;
+    sf::Vector2i getSize() const;
+    float getSquareSize() const;
+    sf::Vector2i getFinish() const;
+    bool isInMapRange(int32_t x, int32_t y) const;
 
     void render(sf::RenderTarget* target);
 
+    const std::vector<uint16_t>& operator[](size_t n) const;
+
 protected:
-    bool isInMapRange(int32_t x, int32_t y) const;
     int32_t getSurroundingWallCount(int32_t gridX, int32_t gridY, int32_t step);
     void clearMapFlags();
 
     void randomFillMap(int32_t randomFillPercent, bool useRandomSeed);
-    void generateMap(int32_t randomFillPercent, int32_t smoothAmount, bool useRandomSeed = true, std::string seed = "0");
+    void generateMap(int32_t randomFillPercent,
+                     int32_t startX, int32_t startY,
+                     int32_t finishX, int32_t finishY,
+                     bool useRandomSeed = true,
+                     std::string seed = "0");
     void smoothMap(bool closingAreas);
 
     std::vector<Coord> getRegionTiles(int32_t startX, int32_t startY);
@@ -70,6 +82,12 @@ protected:
     int32_t width_;
     int32_t height_;
     float squareSize_;
+
+    sf::Vector2i start_;
+    sf::Vector2i finish_;
+
+    sf::RectangleShape startMark_;
+    sf::RectangleShape finishMark_;
 
     std::string seed_;
 };

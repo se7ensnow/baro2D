@@ -15,6 +15,7 @@
 #include <memory>
 #include <queue>
 #include <algorithm>
+#include <deque>
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>

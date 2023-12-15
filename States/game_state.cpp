@@ -8,15 +8,15 @@ GameState::GameState(sf::RenderWindow* window,
     initKeybinds();
     initFonts();
     initTextures();
+    initSounds();
     initPauseMenu();
-    initSub();
     initMap();
+    initControl();
+    initSub();
+    initSonar();
 }
 
-GameState::~GameState() {
-    delete pmenu_;
-    delete sub_;
-}
+GameState::~GameState() = default;
 
 void GameState::initKeybinds() {
     std::ifstream ifs("../../Config/gamestate_keybinds.ini");
@@ -36,30 +36,126 @@ void GameState::initKeybinds() {
 }
 
 void GameState::initFonts() {
-    if (!font_.loadFromFile("../../Fonts/Silkscreen-Bold.ttf")) {
+    if (!font_.loadFromFile("../../Resources/Fonts/Silkscreen-Bold.ttf")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load font!" <<std::endl;
+    }
+    if (!secondFont_.loadFromFile("../../Resources/Fonts/Silkscreen-Regular.ttf")) {
         std::cerr <<"ERROR::GAMESTATE::Could not load font!" <<std::endl;
     }
 }
 
 void GameState::initTextures() {
-    sf::Texture temp;
     if (!textures_["SUBMARINE_IDLE"].loadFromFile("../../Resources/Images/Sprites/Sub/submarine_texture.png")) {
         std::cerr <<"ERROR::GAMESTATE::Could not load submarine texture!" <<std::endl;
+    }
+    if (!textures_["ARROW"].loadFromFile("../../Resources/Images/Sprites/Sonar/arrow_texture.png")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load arrow texture!" <<std::endl;
+    }
+}
+
+void GameState::initSounds() {
+    if (!sounds_["SONAR_WAVE_1"].loadFromFile("../../Resources/Audio/Sonar/wave1.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave1 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_2"].loadFromFile("../../Resources/Audio/Sonar/wave2.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave2 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_3"].loadFromFile("../../Resources/Audio/Sonar/wave3.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave3 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_4"].loadFromFile("../../Resources/Audio/Sonar/wave4.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave4 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_5"].loadFromFile("../../Resources/Audio/Sonar/wave5.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave5 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_6"].loadFromFile("../../Resources/Audio/Sonar/wave6.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave6 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_7"].loadFromFile("../../Resources/Audio/Sonar/wave7.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave7 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_8"].loadFromFile("../../Resources/Audio/Sonar/wave8.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave8 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_9"].loadFromFile("../../Resources/Audio/Sonar/wave9.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave9 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_10"].loadFromFile("../../Resources/Audio/Sonar/wave10.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave10 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_11"].loadFromFile("../../Resources/Audio/Sonar/wave11.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave11 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_12"].loadFromFile("../../Resources/Audio/Sonar/wave12.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave12 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_13"].loadFromFile("../../Resources/Audio/Sonar/wave13.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave13 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_14"].loadFromFile("../../Resources/Audio/Sonar/wave14.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave14 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_15"].loadFromFile("../../Resources/Audio/Sonar/wave15.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave15 sound!" <<std::endl;
+    }
+    if (!sounds_["SONAR_WAVE_16"].loadFromFile("../../Resources/Audio/Sonar/wave16.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load wave16 sound!" <<std::endl;
+    }
+    if (!sounds_["REACTOR_ALARM"].loadFromFile("../../Resources/Audio/Submarine/alarm.wav")) {
+        std::cerr <<"ERROR::GAMESTATE::Could not load alarm sound!" <<std::endl;
     }
 }
 
 void GameState::initPauseMenu() {
-    pmenu_ = new PauseMenu(*window_, font_);
+    pmenu_ = std::make_unique<PauseMenu>(*window_, font_);
 
     pmenu_->addButton("EXIT_STATE", static_cast<float>(window_->getSize().y) - 200.f, "Quit");
 }
 
 void GameState::initSub() {
-    sub_ = new Sub(0, 0, textures_["SUBMARINE_IDLE"]);
+    sub_ = std::make_unique<Sub>(20 * 30.f, 10 * 30.f,
+                                 textures_["SUBMARINE_IDLE"], 0.1f,
+                                 *window_, *map_,
+                                 font_, secondFont_,
+                                 sounds_["REACTOR_ALARM"]);
+}
+
+void GameState::initControl() {
+    control_ = std::make_unique<Control>(static_cast<float>(window_->getSize().x) / 2.f,
+                                         static_cast<float>(window_->getSize().y) / 2.f,
+                                         150, 450, textures_["ARROW"]);
 }
 
 void GameState::initMap() {
-    map_ = new Map(192, 108, 10.f, 45, 5);
+    map_ = std::make_unique<Map>(192, 108, 30.f,
+                                 20, 10, 170, 90,
+                                 45);
+}
+
+void GameState::initSonar() {
+    std::vector<sf::SoundBuffer*> soundBuffers = {&sounds_["SONAR_WAVE_1"],
+                                                 &sounds_["SONAR_WAVE_2"],
+                                                 &sounds_["SONAR_WAVE_3"],
+                                                 &sounds_["SONAR_WAVE_4"],
+                                                 &sounds_["SONAR_WAVE_5"],
+                                                 &sounds_["SONAR_WAVE_6"],
+                                                 &sounds_["SONAR_WAVE_7"],
+                                                 &sounds_["SONAR_WAVE_8"],
+                                                 &sounds_["SONAR_WAVE_9"],
+                                                 &sounds_["SONAR_WAVE_10"],
+                                                 &sounds_["SONAR_WAVE_11"],
+                                                 &sounds_["SONAR_WAVE_12"],
+                                                 &sounds_["SONAR_WAVE_13"],
+                                                 &sounds_["SONAR_WAVE_14"],
+                                                 &sounds_["SONAR_WAVE_15"],
+                                                 &sounds_["SONAR_WAVE_16"]};
+    sonar_ = std::make_unique<Sonar>(static_cast<float>(window_->getSize().x) / 2.f,
+                                     static_cast<float>(window_->getSize().y) / 2.f,
+                                     400,
+                                     400.f, 2.5f,
+                                     soundBuffers,
+                                     *map_, *sub_, font_);
 }
 
 void GameState::update(const float& dt) {
@@ -68,7 +164,11 @@ void GameState::update(const float& dt) {
 
     if (!paused_) {
         updatePlayerInput(dt);
-        sub_->update(dt);
+        sub_->update(dt, mousePosView_);
+        if (sub_->endGameSignal()) {
+            endState();
+        }
+        sonar_->update(dt);
     } else {
         pmenu_->update(mousePosView_);
         updatePauseMenuGui();
@@ -80,8 +180,9 @@ void GameState::render(sf::RenderTarget* target) {
         target = window_;
     }
 
+    sonar_->render(target);
+    control_->render(target);
     sub_->render(target);
-    map_->render(target);
 
     if (paused_) {
         pmenu_->render(target);
@@ -89,22 +190,8 @@ void GameState::render(sf::RenderTarget* target) {
 }
 
 void GameState::updatePlayerInput(const float &dt) {
-     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key(keybinds_.at("MOVE_LEFT")))) {
-        sub_->move(-1.f, 0.f, dt);
-        std::cout <<"A" <<std::endl;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key(keybinds_.at("MOVE_RIGHT")))) {
-        sub_->move(1.f, 0.f, dt);
-        std::cout <<"D" <<std::endl;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key(keybinds_.at("MOVE_UP")))) {
-        sub_->move(0.f, -1.f, dt);
-        std::cout <<"W" <<std::endl;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key(keybinds_.at("MOVE_DOWN")))) {
-        sub_->move(0.f, 1.f, dt);
-        std::cout <<"S" <<std::endl;
-    }
+    sf::Vector2f dir = control_->update(mousePosView_);
+    sub_->move(dir, dt);
 }
 
 void GameState::updateInput(const float &dt) {

@@ -11,12 +11,7 @@ MainMenuState::MainMenuState(sf::RenderWindow* window,
     initGui();
 }
 
-MainMenuState::~MainMenuState() {
-    auto it = buttons_.begin();
-    for (it = buttons_.begin(); it != buttons_.end(); ++it) {
-        delete it->second;
-    }
-}
+MainMenuState::~MainMenuState() = default;
 
 void MainMenuState::initVariables() {
 
@@ -31,7 +26,7 @@ void MainMenuState::initBackground() {
 }
 
 void MainMenuState::initFonts() {
-    if (!font_.loadFromFile("../../Fonts/Silkscreen-Bold.ttf")) {
+    if (!font_.loadFromFile("../../Resources/Fonts/Silkscreen-Bold.ttf")) {
         std::cerr <<"ERROR::MAINMENUSTATE::Could not load font!" <<std::endl;
     }
 }
@@ -54,32 +49,32 @@ void MainMenuState::initKeybinds() {
 }
 
 void MainMenuState::initGui() {
-    buttons_["GAME_STATE"] = new Button(110, 300, 250, 50,
-                                        &font_, "New Game", 50,
-                                        sf::Color(70, 70, 70, 200),
-                                        sf::Color(250, 250, 250, 250),
-                                        sf::Color(20, 20, 20, 50),
-                                        sf::Color(70, 70, 70, 0),
-                                        sf::Color(150, 150, 150, 0),
-                                        sf::Color(20, 20, 20, 0));
+    buttons_["GAME_STATE"] = std::make_unique<Button>(110, 300, 250, 50,
+                                                      &font_, "New Game", 50,
+                                                      sf::Color(70, 70, 70, 200),
+                                                      sf::Color(250, 250, 250, 250),
+                                                      sf::Color(20, 20, 20, 50),
+                                                      sf::Color(70, 70, 70, 0),
+                                                      sf::Color(150, 150, 150, 0),
+                                                      sf::Color(20, 20, 20, 0));
 
-    buttons_["SETTINGS_STATE"] = new Button(110, 400, 250, 50,
-                                        &font_, "Settings", 50,
-                                        sf::Color(70, 70, 70, 200),
-                                        sf::Color(250, 250, 250, 250),
-                                        sf::Color(20, 20, 20, 50),
-                                            sf::Color(70, 70, 70, 0),
-                                            sf::Color(150, 150, 150, 0),
-                                            sf::Color(20, 20, 20, 0));
+    buttons_["SETTINGS_STATE"] = std::make_unique<Button>(110, 400, 250, 50,
+                                                          &font_, "Settings", 50,
+                                                          sf::Color(70, 70, 70, 200),
+                                                          sf::Color(250, 250, 250, 250),
+                                                          sf::Color(20, 20, 20, 50),
+                                                          sf::Color(70, 70, 70, 0),
+                                                          sf::Color(150, 150, 150, 0),
+                                                          sf::Color(20, 20, 20, 0));
 
-    buttons_["EXIT_STATE"] = new Button(110, 550, 250, 50,
-                                        &font_, "Quit", 50,
-                                        sf::Color(70, 70, 70, 200),
-                                        sf::Color(250, 250, 250, 250),
-                                        sf::Color(20, 20, 20, 50),
-                                        sf::Color(70, 70, 70, 0),
-                                        sf::Color(150, 150, 150, 0),
-                                        sf::Color(20, 20, 20, 0));
+    buttons_["EXIT_STATE"] = std::make_unique<Button>(110, 550, 250, 50,
+                                                      &font_, "Quit", 50,
+                                                      sf::Color(70, 70, 70, 200),
+                                                      sf::Color(250, 250, 250, 250),
+                                                      sf::Color(20, 20, 20, 50),
+                                                      sf::Color(70, 70, 70, 0),
+                                                      sf::Color(150, 150, 150, 0),
+                                                      sf::Color(20, 20, 20, 0));
 }
 
 void MainMenuState::update(const float& dt) {

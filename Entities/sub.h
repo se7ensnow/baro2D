@@ -1,25 +1,105 @@
 #pragma once
 
+#include <utility>
+
 #include "entity.h"
 #include "../Components/movement_component.h"
+#include "../UI/gui.h"
 
-class Sub : public Entity {
+class Sub {
 public:
-    Sub(float x, float y, sf::Texture& texture);
+    struct Robot {
+        std::string state_ = "AVAILABLE";
+        float curTimer_ = 0;
+        float maxTimer_ = 0;
+        Robot(std::string state) : state_(std::move(state)) {};
+    };
+public:
+    Sub(float x, float y,
+        sf::Texture& texture, float scale,
+        sf::RenderWindow& window, const Map& map,
+        sf::Font& font, sf::Font& secondFont,
+        sf::SoundBuffer& buffer);
     ~Sub();
 
-    void move(const float& dir_x, const float& dir_y, const float& dt) override;
+    sf::Vector2f getPosition() const;
+    bool breakSonarSignal() const;
+    bool endGameSignal() const;
 
-    void update(const float& dt) override;
+    void move(const sf::Vector2f& dir, const float& dt);
+
+    void update(const float& dt, const sf::Vector2f& mousePos);
+    void render(sf::RenderTarget* target);
 
 protected:
-    void initVariables() override;
+    void initVariables();
+    void initSprite(sf::Texture& texture, float x, float y, float scale);
+    void initUI();
+    void initSound();
+    void initButtons();
+    void initBreakables();
+    void initRobots();
+    void setPosition(float x, float y);
     void createMovementComponent(sf::Sprite& sprite,
                                  float maxAccelerationX, float maxAccelerationY,
-                                 float pumpSpeed,
+                                 float pumpSpeed, float hullSpeed,
                                  float decelerationCoef);
+    void createHitboxComponent(float width, float height, float offset_x, float offset_y);
     void initComponents();
+    void updateUI();
+    void renderUI(sf::RenderTarget* target);
+    void updateButtons(const sf::Vector2f& mousePos);
+    void renderButtons(sf::RenderTarget* target);
+    void updateBreakables(const float& dt);
 
 protected:
-    MovementComponent* movementComponent_;
+    std::unique_ptr<MovementComponent> movementComponent_;
+    std::unique_ptr<HitboxComponent> hitboxComponent_;
+
+    sf::Vector2f position_;
+
+    const Map& map_;
+
+    sf::Sprite sprite_;
+
+    sf::Vector2u windowSize_;
+
+    sf::Font& font_;
+    sf::Font& secondFont_;
+
+    sf::RectangleShape horSpeedContainer_;
+    sf::Text horSpeedText_;
+    sf::Text horSpeedLabel_;
+
+    sf::RectangleShape vertSpeedContainer_;
+    sf::Text vertSpeedText_;
+    sf::Text vertSpeedLabel_;
+
+    sf::RectangleShape depthContainer_;
+    sf::Text depthText_;
+    sf::Text depthLabel_;
+
+    sf::RectangleShape ballastContainer_;
+    sf::RectangleShape ballastLevel_;
+    sf::Text ballastLabel_;
+
+    std::map<std::string, uint16_t> breakables_;
+    std::map<std::string, float> repairTimers_;
+    std::mt19937 pseudoRandom_;
+    float reactorTimer_;
+    float reactorMaxTimer_;
+    sf::RectangleShape background_;
+    float alarmTimer_;
+    float maxAlarmTimer_;
+    bool lost_;
+    sf::SoundBuffer& buffer_;
+    sf::Sound reactorAlarm_;
+
+    float hullTimer_;
+    float hullMaxTimer_;
+
+    std::map<std::string, sf::Text> breakablesUI_;
+    std::map<std::string, std::unique_ptr<Button>> buttons_;
+
+    std::vector<Robot> robots_;
 };

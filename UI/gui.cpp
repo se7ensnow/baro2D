@@ -39,6 +39,37 @@ Button::Button(float x, float y, float width, float height,
             shape_.getPosition().y + (shape_.getSize().y / 2.f) - text_.getGlobalBounds().height / 2.f - text_.getGlobalBounds().top);
 }
 
+Button::Button(const sf::Text& text,
+               sf::Color textIdleColor,
+               sf::Color idleColor,
+               sf::Color hoverColor,
+               sf::Color activeColor,
+               sf::Color outlineIdleColor,
+               sf::Color outlineHoverColor,
+               sf::Color outlineActiveColor,
+               uint16_t id)
+               : idleColor_(idleColor),
+               hoverColor_(hoverColor),
+               activeColor_(activeColor),
+               outlineIdleColor_(outlineIdleColor),
+               outlineHoverColor_(outlineHoverColor),
+               outlineActiveColor_(outlineActiveColor),
+               id_(id) {
+    buttonState_ = BTN_IDLE;
+
+    text_ = text;
+
+    setTextColor(textIdleColor);
+
+    shape_.setPosition(text_.getPosition());
+    shape_.setSize(sf::Vector2f(text_.getGlobalBounds().width + text_.getLocalBounds().left, text_.getGlobalBounds().height + text_.getLocalBounds().top));
+    shape_.setFillColor(idleColor_);
+    shape_.setOutlineThickness(1.f);
+    shape_.setOutlineColor(outlineIdleColor_);
+
+
+}
+
 Button::~Button() {
 
 }
@@ -59,6 +90,14 @@ const uint16_t& Button::getId() const {
 
 void Button::setText(const std::string &text) {
     text_.setString(text);
+}
+
+void Button::setTextColor(sf::Color textIdleColor) {
+    textIdleColor_ = textIdleColor;
+    textHoverColor_ = textIdleColor_;
+    textHoverColor_.a = 250;
+    textActiveColor_ = textIdleColor_;
+    textActiveColor_.a = 40;
 }
 
 void Button::setId(uint16_t id) {

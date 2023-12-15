@@ -28,5 +28,5 @@ protected:
     sf::RectangleShape background_;
     sf::Font font_;
 
-    std::map<std::string, Button*> buttons_;
+    std::map<std::string, std::unique_ptr<Button>> buttons_;
 };

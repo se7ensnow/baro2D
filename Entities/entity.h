@@ -7,7 +7,6 @@ public:
     Entity();
     virtual ~Entity();
 
-    virtual void setPosition(float x, float y);
     virtual void move(const float& dir_x, const float& dir_y, const float& dt) = 0;
 
     virtual void update(const float& dt);
@@ -16,12 +15,10 @@ public:
 protected:
     virtual void initVariables();
     void setTexture(sf::Texture& texture);
-    void createHitboxComponent(sf::Sprite& sprite,
-                               float offset_x, float offset_y,
-                               float width, float height);
+    virtual void setPosition(float x, float y) = 0;
 
 protected:
     sf::Sprite sprite_;
 
-    HitboxComponent* hitboxComponent_;
+    sf::Vector2f position_;
 };
