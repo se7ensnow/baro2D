@@ -2,6 +2,8 @@
 
 #include "../src/headers.h"
 
+# define BARO_PI 3.14159265358979323846
+
 namespace math {
 
     template <typename T>
@@ -13,7 +15,7 @@ namespace math {
     template <typename T>
     inline float radToDeg(T radians)
     {
-        return radians * 180.0 / M_PI;
+        return radians * 180.0 / BARO_PI;
     }
 
     template <typename T>

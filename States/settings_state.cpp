@@ -23,14 +23,14 @@ void SettingsState::initVariables() {
 void SettingsState::initBackground() {
     background_.setSize(sf::Vector2f(window_->getSize()));
     if (!bgTexture_.loadFromFile("../../Resources/Images/Backgrounds/main_menu_bg.png")) {
-        std::cerr <<"ERROR::MAINMENUSTATE::Could not load background texture!" <<std::endl;
+        std::cerr <<"ERROR::SETTINGSSTATE::Could not load background texture!" <<std::endl;
     }
     background_.setTexture(&bgTexture_);
 }
 
 void SettingsState::initFonts() {
-    if (!font_.loadFromFile("../../Fonts/Silkscreen-Bold.ttf")) {
-        std::cerr <<"ERROR::MAINMENUSTATE::Could not load font!" <<std::endl;
+    if (!font_.loadFromFile("../../Resources/Fonts/Silkscreen-Bold.ttf")) {
+        std::cerr <<"ERROR::SETTINGSSTATE::Could not load font!" <<std::endl;
     }
 }
 
@@ -47,7 +47,7 @@ void SettingsState::initKeybinds() {
 
         ifs.close();
     } else {
-        std::cerr << "ERROR::GAME_STATE::Could not load keybinds!" << std::endl;
+        std::cerr << "ERROR::SETTINGSSTATE::Could not load keybinds!" << std::endl;
     }
 }
 
