@@ -4,13 +4,15 @@
 
 class MovementComponent {
 public:
+    enum axis{X=0, Y, BOTH};
+public:
     MovementComponent(float maxAccelerationX, float maxAccelerationY,
                       float pumpSpeed, float hullSpeed,
                       float decelerationCoef,
                       std::map<std::string, uint16_t>& breakables);
     ~MovementComponent();
 
-    void resetVelocity();
+    void resetVelocity(axis i, const float &dt);
     sf::Vector2f getVelocity() const;
     float getCurBallastLevel() const;
 

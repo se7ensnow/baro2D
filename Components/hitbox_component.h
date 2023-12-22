@@ -8,13 +8,11 @@ class HitboxComponent {
 public:
     HitboxComponent(float width, float height,
                     float offset_x, float offset_y,
-                    const Map& map, const sf::Vector2f& position);
+                    const Map& map);
     ~HitboxComponent();
 
-    bool checkIntersect(const sf::FloatRect& frect) const;
-    bool inBounds() const;
+    bool inBounds(const sf::Vector2f& pos);
 
-    void update();
     void render(sf::RenderTarget* target);
 
 protected:
@@ -25,7 +23,6 @@ protected:
     float offsetY_;
 
     sf::FloatRect hitbox_;
-    const sf::Vector2f& position_;
 
     sf::RectangleShape hitboxShape_;
 

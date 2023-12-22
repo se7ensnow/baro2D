@@ -7,7 +7,7 @@ class SettingsState : public State {
 public:
     SettingsState(sf::RenderWindow* window,
                   std::map<std::string, int>* supportedKeys,
-                  std::stack<State*>* states);
+                  std::stack<std::unique_ptr<State>>& states);
     ~SettingsState();
 
     void update(const float& dt) override;

@@ -5,7 +5,10 @@
 #include "entity.h"
 #include "../Components/movement_component.h"
 #include "../UI/gui.h"
+#include "../UI/end_game_menu.h"
 #include "../Utils/sf_math.h"
+
+// TODO: Restore order and names of functions
 
 class Sub {
 public:
@@ -22,6 +25,7 @@ public:
             timer_.setFont(font);
         };
     };
+
 public:
     Sub(float x, float y,
         sf::Texture& texture, float scale,
@@ -34,7 +38,7 @@ public:
 
     sf::Vector2f getPosition() const;
     bool breakSonarSignal() const;
-    bool endGameSignal() const;
+    EndGameMenu::endStates getEndState() const;
 
     void move(const sf::Vector2f& dir, const float& dt);
 
@@ -62,6 +66,7 @@ protected:
     void renderButtons(sf::RenderTarget* target);
     void updateBreakables(const float& dt);
     void renderRobots(sf::RenderTarget* target);
+    void updatePosition(const float& dt);
 
 protected:
     std::unique_ptr<MovementComponent> movementComponent_;
@@ -73,6 +78,8 @@ protected:
 
     const Map& map_;
     sf::Vector2f finish_;
+
+    EndGameMenu::endStates endState_;
 
     sf::Sprite sprite_;
 
@@ -105,7 +112,6 @@ protected:
     sf::RectangleShape background_;
     float alarmTimer_;
     float maxAlarmTimer_;
-    bool lost_;
     sf::SoundBuffer& buffer_;
     sf::Sound reactorAlarm_;
 

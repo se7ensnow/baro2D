@@ -31,7 +31,7 @@ protected:
     sf::Clock dtClock_;
     float deltaTime_;
 
-    std::stack<State*> states_;
+    std::stack<std::unique_ptr<State>> states_;
 
     std::map<std::string, int> supportedKeys_;
 };

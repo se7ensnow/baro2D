@@ -2,7 +2,7 @@
 
 SettingsState::SettingsState(sf::RenderWindow* window,
                              std::map<std::string, int>* supportedKeys,
-                             std::stack<State*>* states) : State(window, supportedKeys, states) {
+                             std::stack<std::unique_ptr<State>>& states) : State(window, supportedKeys, states) {
     initVariables();
     initBackground();
     initFonts();
@@ -12,9 +12,7 @@ SettingsState::SettingsState(sf::RenderWindow* window,
 
 }
 
-SettingsState::~SettingsState() {
-
-}
+SettingsState::~SettingsState() = default;
 
 void SettingsState::initVariables() {
     modes_ = sf::VideoMode::getFullscreenModes();

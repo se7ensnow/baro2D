@@ -7,7 +7,7 @@ class MainMenuState : public State {
 public:
     explicit MainMenuState(sf::RenderWindow* window,
                            std::map<std::string, int>* supportedKeys,
-                           std::stack<State*>* states);
+                           std::stack<std::unique_ptr<State>>& states);
     ~MainMenuState() override;
 
     void update(const float& dt) override;

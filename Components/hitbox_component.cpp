@@ -2,12 +2,10 @@
 
 HitboxComponent::HitboxComponent(float width, float height,
                                  float offset_x, float offset_y,
-                                 const Map& map, const sf::Vector2f& position)
-                                 : map_(map), position_(position), offsetX_(offset_x), offsetY_(offset_y) {
+                                 const Map& map)
+                                 : map_(map), offsetX_(offset_x), offsetY_(offset_y) {
     hitbox_.width = width;
     hitbox_.height = height;
-    hitbox_.left = position_.x - hitbox_.width / 2.f + offsetX_;
-    hitbox_.top = position_.y - hitbox_.height / 2.f + offsetY_;
 
     initShape();
 }
@@ -23,11 +21,9 @@ void HitboxComponent::initShape() {
     hitboxShape_.setOutlineColor(sf::Color::Green);
 }
 
-bool HitboxComponent::checkIntersect(const sf::FloatRect& frect) const {
-    return hitbox_.intersects(frect);
-}
-
-bool HitboxComponent::inBounds() const {
+bool HitboxComponent::inBounds(const sf::Vector2f& pos) {
+    hitbox_.left = pos.x - hitbox_.width / 2.f + offsetX_;
+    hitbox_.top = pos.y - hitbox_.height / 2.f + offsetY_;
     float mapSquareSize =  map_.getSquareSize();
     int32_t left = std::floor(hitbox_.left / mapSquareSize);
     int32_t top = std::floor(hitbox_.top / mapSquareSize);
@@ -44,11 +40,6 @@ bool HitboxComponent::inBounds() const {
         }
     }
     return true;
-}
-
-void HitboxComponent::update() {
-    hitbox_.left = position_.x - hitbox_.width / 2.f + offsetX_;
-    hitbox_.top = position_.y - hitbox_.height / 2.f + offsetY_;
 }
 
 void HitboxComponent::render(sf::RenderTarget* target) {

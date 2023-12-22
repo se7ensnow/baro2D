@@ -8,12 +8,6 @@ Game::Game() {
 }
 
 Game::~Game() {
-    delete window_;
-
-    while (!states_.empty()) {
-        delete states_.top();
-        states_.pop();
-    }
 }
 
 void Game::endApplication() {
@@ -79,7 +73,7 @@ void Game::initKeys() {
 }
 
 void Game::initStates() {
-    states_.push(new MainMenuState(window_, &supportedKeys_, &states_));
+    states_.push(std::make_unique<MainMenuState>(window_, &supportedKeys_, states_));
 }
 
 void Game::update() {
@@ -88,7 +82,6 @@ void Game::update() {
 
         if (states_.top()->getQuit()) {
             states_.top()->endState();
-            delete states_.top();
             states_.pop();
         }
     }

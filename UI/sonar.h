@@ -4,6 +4,7 @@
 #include "../Utils/sf_shapes.h"
 #include "../Utils/sf_math.h"
 
+
 class Sonar {
 public:
     enum directions{RIGHT=0, DOWN, LEFT, UP};
@@ -34,7 +35,7 @@ protected:
     void updateWalls(const float& dt);
     void updateWave(const float& dt);
     void updateFinish();
-    std::vector<sf::Vector2f> getMapTiles();
+    std::vector<sf::Vector2i> getMapTiles();
 
 protected:
     const Map& map_;
@@ -50,11 +51,12 @@ protected:
     sf::CircleShape outerCircle_;
 
     // std::vector<EllipseShape> walls_;
-    std::vector<std::unique_ptr<Wall>> walls_;
+    std::map<std::pair<int32_t, int32_t>, std::unique_ptr<Wall>> walls_;
 
     sf::CircleShape sonarWave_;
     float prevWaveRadius_;
     float curWaveRadius_;
+    sf::Vector2f waveCenter_;
     float waveSpeed_;
     float waveTimer_;
     float maxWaveTimer_;
@@ -66,5 +68,6 @@ protected:
     sf::Font& font_;
     sf::RectangleShape finishContainer_;
     sf::Text finishText_;
+    sf::Text finishDistText_;
     sf::Vector2f finish_;
 };

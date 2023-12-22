@@ -2,7 +2,7 @@
 
 MainMenuState::MainMenuState(sf::RenderWindow* window,
                              std::map<std::string, int>* supportedKeys,
-                             std::stack<State*>* states)
+                             std::stack<std::unique_ptr<State>>& states)
         : State(window, supportedKeys, states) {
     initVariables();
     initBackground();
@@ -58,14 +58,14 @@ void MainMenuState::initGui() {
                                                       sf::Color(150, 150, 150, 0),
                                                       sf::Color(20, 20, 20, 0));
 
-    buttons_["SETTINGS_STATE"] = std::make_unique<Button>(110, 400, 250, 50,
-                                                          &font_, "Settings", 50,
-                                                          sf::Color(70, 70, 70, 200),
-                                                          sf::Color(250, 250, 250, 250),
-                                                          sf::Color(20, 20, 20, 50),
-                                                          sf::Color(70, 70, 70, 0),
-                                                          sf::Color(150, 150, 150, 0),
-                                                          sf::Color(20, 20, 20, 0));
+    // buttons_["SETTINGS_STATE"] = std::make_unique<Button>(110, 400, 250, 50,
+    //                                                       &font_, "Settings", 50,
+    //                                                       sf::Color(70, 70, 70, 200),
+    //                                                       sf::Color(250, 250, 250, 250),
+    //                                                       sf::Color(20, 20, 20, 50),
+    //                                                       sf::Color(70, 70, 70, 0),
+    //                                                       sf::Color(150, 150, 150, 0),
+    //                                                       sf::Color(20, 20, 20, 0));
 
     buttons_["EXIT_STATE"] = std::make_unique<Button>(110, 550, 250, 50,
                                                       &font_, "Quit", 50,
@@ -109,11 +109,7 @@ void MainMenuState::updateGui() {
     }
 
     if (buttons_["GAME_STATE"]->isPressed()) {
-        states_->push(new GameState(window_, supportedKeys_, states_));
-    }
-
-    if (buttons_["SETTINGS_STATE"]->isPressed()) {
-        states_->push(new SettingsState(window_, supportedKeys_, states_));
+        states_.push(std::make_unique<GameState>(window_, supportedKeys_, states_));
     }
 
     if (buttons_["EXIT_STATE"]->isPressed()) {

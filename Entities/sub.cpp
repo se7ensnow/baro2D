@@ -14,6 +14,8 @@ Sub::Sub(float x, float y,
                            static_cast<float>(map_.getFinish().y) * map_.getSquareSize());
     setPosition(x, y);
 
+    endState_ = EndGameMenu::NONE;
+
     initSprite(texture,
                static_cast<float>(window.getSize().x) / 2.f,
                static_cast<float>(window.getSize().y) / 2.f,
@@ -35,6 +37,7 @@ sf::Vector2f Sub::getPosition() const {
 }
 
 void Sub::initVariables() {
+    // TODO: Use general random generator
     hitboxComponent_ = nullptr;
     movementComponent_ = nullptr;
     pseudoRandom_ = std::mt19937(std::random_device{}());
@@ -48,6 +51,7 @@ void Sub::initSprite(sf::Texture &texture, float x, float y, float scale) {
 }
 
 void Sub::initUI() {
+    // TODO: Use percentages instead of pixels
     horSpeedContainer_.setSize(sf::Vector2f(250.f, 50.f));
     horSpeedContainer_.setFillColor(sf::Color(20, 20, 20, 100));
     horSpeedContainer_.setOrigin(125.f, 25.f);
@@ -56,8 +60,8 @@ void Sub::initUI() {
     horSpeedText_.setCharacterSize(30);
     horSpeedText_.setString("0 m/s");
     horSpeedText_.setPosition(
-            horSpeedContainer_.getPosition().x - horSpeedText_.getGlobalBounds().width / 2.f - horSpeedText_.getGlobalBounds().left,
-            horSpeedContainer_.getPosition().y - horSpeedText_.getGlobalBounds().height / 2.f - horSpeedText_.getGlobalBounds().top);
+            horSpeedContainer_.getPosition().x - horSpeedText_.getLocalBounds().width / 2.f - horSpeedText_.getLocalBounds().left,
+            horSpeedContainer_.getPosition().y - horSpeedText_.getLocalBounds().height / 2.f - horSpeedText_.getLocalBounds().top);
     horSpeedLabel_.setFont(font_);
     horSpeedLabel_.setCharacterSize(25);
     horSpeedLabel_.setString("Velocity:");
@@ -71,8 +75,8 @@ void Sub::initUI() {
     vertSpeedText_.setCharacterSize(30);
     vertSpeedText_.setString("0 m/s");
     vertSpeedText_.setPosition(
-            vertSpeedContainer_.getPosition().x - vertSpeedText_.getGlobalBounds().width / 2.f - vertSpeedText_.getGlobalBounds().left,
-            vertSpeedContainer_.getPosition().y - vertSpeedText_.getGlobalBounds().height / 2.f - vertSpeedText_.getGlobalBounds().top);
+            vertSpeedContainer_.getPosition().x - vertSpeedText_.getLocalBounds().width / 2.f - vertSpeedText_.getLocalBounds().left,
+            vertSpeedContainer_.getPosition().y - vertSpeedText_.getLocalBounds().height / 2.f - vertSpeedText_.getLocalBounds().top);
     vertSpeedLabel_.setFont(font_);
     vertSpeedLabel_.setCharacterSize(25);
     vertSpeedLabel_.setString("Descent velocity:");
@@ -86,8 +90,8 @@ void Sub::initUI() {
     depthText_.setCharacterSize(30);
     depthText_.setString("1000 m");
     depthText_.setPosition(
-            depthContainer_.getPosition().x - depthText_.getGlobalBounds().width / 2.f - depthText_.getGlobalBounds().left,
-            depthContainer_.getPosition().y - depthText_.getGlobalBounds().height / 2.f - depthText_.getGlobalBounds().top);
+            depthContainer_.getPosition().x - depthText_.getLocalBounds().width / 2.f - depthText_.getLocalBounds().left,
+            depthContainer_.getPosition().y - depthText_.getLocalBounds().height / 2.f - depthText_.getLocalBounds().top);
     depthLabel_.setFont(font_);
     depthLabel_.setCharacterSize(25);
     depthLabel_.setString("Depth:");
@@ -114,6 +118,7 @@ void Sub::initSound() {
 
 
 void Sub::initButtons() {
+    // TODO: Use percentages instead of pixels
     breakablesUI_["REACTOR"].setFont(font_);
     breakablesUI_["REACTOR"].setPosition(50, 50);
     breakablesUI_["REACTOR"].setCharacterSize(40);
@@ -152,6 +157,7 @@ void Sub::initButtons() {
 }
 
 void Sub::initBreakables() {
+    // TODO: Sort out constants
     breakables_["REACTOR"] = 0;
     breakables_["ENGINE"] = 0;
     breakables_["SONAR"] = 0;
@@ -168,7 +174,6 @@ void Sub::initBreakables() {
 
     reactorTimer_ = 0.f;
     reactorMaxTimer_ = 10.f;
-    lost_ = false;
 
     hullMaxTimer_ = 2.f;
     hullTimer_ = hullMaxTimer_;
@@ -180,6 +185,7 @@ void Sub::initBreakables() {
 }
 
 void Sub::initRobots(sf::Texture& robotTexture) {
+    // TODO: Remake for unlimited number of robots
     robots_.emplace_back("AVAILABLE", robotTexture, secondFont_);
     robots_.emplace_back("AVAILABLE", robotTexture, secondFont_);
 }
@@ -192,8 +198,8 @@ bool Sub::breakSonarSignal() const {
     return breakables_.at("SONAR") != 0;
 }
 
-bool Sub::endGameSignal() const {
-    return lost_;
+EndGameMenu::endStates Sub::getEndState() const {
+    return endState_;
 }
 
 void Sub::createMovementComponent(sf::Sprite& sprite,
@@ -206,7 +212,7 @@ void Sub::createMovementComponent(sf::Sprite& sprite,
 }
 
 void Sub::createHitboxComponent(float width, float height, float offset_x, float offset_y) {
-    hitboxComponent_ = std::make_unique<HitboxComponent>(width, height, offset_x, offset_y, map_, position_);
+    hitboxComponent_ = std::make_unique<HitboxComponent>(width, height, offset_x, offset_y, map_);
 }
 
 void Sub::initComponents() {
@@ -219,22 +225,11 @@ void Sub::move(const sf::Vector2f& dir, const float& dt) {
 }
 
 void Sub::update(const float &dt, const sf::Vector2f& mousePos) {
-    sf::Vector2f delta = movementComponent_->update(dt);
-    position_ += delta;
-
-    hitboxComponent_->update();
-    if (!hitboxComponent_->inBounds()) {
-        if (hullTimer_ >= hullMaxTimer_ && breakables_["HULL"] < 4) {
-            breakables_["HULL"]++;
-            hullTimer_ = 0;
-        }
-        position_ -= delta;
-        movementComponent_->resetVelocity();
-        hitboxComponent_->update();
-    }
+    // TODO: Sort out constants
+    updatePosition(dt);
 
     if (math::getLengthSqr(finish_ - position_) <= map_.getSquareSize() * map_.getSquareSize()) {
-        lost_ = true;
+        endState_ = EndGameMenu::WON;
     }
 
     updateUI();
@@ -276,9 +271,21 @@ void Sub::updateUI() {
 
         ballastLevel_.setScale(1.f, 0.f);
     }
+    horSpeedText_.setPosition(
+            horSpeedContainer_.getPosition().x - horSpeedText_.getLocalBounds().width / 2.f - horSpeedText_.getLocalBounds().left,
+            horSpeedContainer_.getPosition().y - horSpeedText_.getLocalBounds().height / 2.f - horSpeedText_.getLocalBounds().top);
+
+    vertSpeedText_.setPosition(
+            vertSpeedContainer_.getPosition().x - vertSpeedText_.getLocalBounds().width / 2.f - vertSpeedText_.getLocalBounds().left,
+            vertSpeedContainer_.getPosition().y - vertSpeedText_.getLocalBounds().height / 2.f - vertSpeedText_.getLocalBounds().top);
+
+    depthText_.setPosition(
+            depthContainer_.getPosition().x - depthText_.getLocalBounds().width / 2.f - depthText_.getLocalBounds().left,
+            depthContainer_.getPosition().y - depthText_.getLocalBounds().height / 2.f - depthText_.getLocalBounds().top);
 }
 
 void Sub::updateButtons(const sf::Vector2f& mousePos) {
+    // TODO: Remake for any number of robots ??
     for (auto& it : breakablesUI_) {
         if (it.second.getGlobalBounds().contains(mousePos)) {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key(keybinds_.at("SELECT_LEFT"))) &&
@@ -326,6 +333,7 @@ void Sub::updateBreakables(const float& dt) {
     }
     if (pseudoRandom_() % 100000 <= 1 && breakables_["REACTOR"] == 0) {
         breakables_["REACTOR"] = 1;
+        reactorTimer_ = 0;
         reactorAlarm_.play();
     }
     if (pseudoRandom_() % 50000 <= 1 && breakables_["ENGINE"] == 0) {
@@ -352,7 +360,7 @@ void Sub::updateBreakables(const float& dt) {
         }
     }
     if (robots_[0].state_ == "AVAILABLE") {
-        robots_[0].robotSprite_.setPosition(50, 800);
+        robots_[0].robotSprite_.setPosition(100, 800);
     } else {
         robots_[0].robotSprite_.setPosition(sf::Vector2f(0,breakablesUI_[robots_[0].state_].getPosition().y));
         robots_[0].timer_.setPosition(sf::Vector2f(10,
@@ -363,7 +371,7 @@ void Sub::updateBreakables(const float& dt) {
         robots_[0].timer_.setString(ss.str());
     }
     if (robots_[1].state_ == "AVAILABLE") {
-        robots_[1].robotSprite_.setPosition(150, 800);
+        robots_[1].robotSprite_.setPosition(450, 800);
     } else {
         robots_[1].robotSprite_.setPosition(sf::Vector2f(0,breakablesUI_[robots_[1].state_].getPosition().y));
         robots_[1].timer_.setPosition(sf::Vector2f(10,
@@ -375,16 +383,21 @@ void Sub::updateBreakables(const float& dt) {
     }
     if (breakables_["REACTOR"] > 0) {
         breakablesUI_["REACTOR"].setFillColor(sf::Color::Red);
-        breakablesUI_["REACTOR"].setString("Reactor overheating");
         reactorTimer_ += dt;
         alarmTimer_ += dt;
         if (alarmTimer_ >= maxAlarmTimer_ * 2) {
             alarmTimer_ = 0;
         }
         if (reactorTimer_ >= reactorMaxTimer_) {
-            lost_ = true;
+            reactorAlarm_.stop();
+            endState_ = EndGameMenu::LOST;
+        } else {
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(2) << reactorMaxTimer_ - reactorTimer_;
+            breakablesUI_["REACTOR"].setString("Reactor overheating " + ss.str());
         }
     } else {
+        alarmTimer_ = 0;
         breakablesUI_["REACTOR"].setFillColor(sf::Color::Green);
         breakablesUI_["REACTOR"].setString("Reactor working");
     }
@@ -431,6 +444,34 @@ void Sub::renderRobots(sf::RenderTarget* target) {
         if (robots_[i].state_ != "AVAILABLE") {
             target->draw(robots_[i].timer_);
         }
+    }
+}
+
+void Sub::updatePosition(const float& dt) {
+    sf::Vector2f delta = movementComponent_->update(dt);
+
+    if (hitboxComponent_->inBounds(position_ + delta)) {
+        position_ += delta;
+    } else if (hitboxComponent_->inBounds(position_ + sf::Vector2f(delta.x, 0))) {
+        if (hullTimer_ >= hullMaxTimer_ && breakables_["HULL"] < 4) {
+            breakables_["HULL"]++;
+            hullTimer_ = 0;
+        }
+        position_.x += delta.x;
+        movementComponent_->resetVelocity(MovementComponent::Y, dt);
+    } else if (hitboxComponent_->inBounds(position_ + sf::Vector2f(0, delta.y))) {
+        if (hullTimer_ >= hullMaxTimer_ && breakables_["HULL"] < 4) {
+            breakables_["HULL"]++;
+            hullTimer_ = 0;
+        }
+        position_.y += delta.y;
+        movementComponent_->resetVelocity(MovementComponent::X, dt);
+    } else {
+        if (hullTimer_ >= hullMaxTimer_ && breakables_["HULL"] < 4) {
+            breakables_["HULL"]++;
+            hullTimer_ = 0;
+        }
+        movementComponent_->resetVelocity(MovementComponent::BOTH, dt);
     }
 }
 

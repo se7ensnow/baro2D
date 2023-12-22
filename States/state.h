@@ -4,7 +4,7 @@
 
 class State {
 public:
-    explicit State(sf::RenderWindow* window, std::map<std::string, int>* supportedKeys, std::stack<State*>* states);
+    explicit State(sf::RenderWindow* window, std::map<std::string, int>* supportedKeys, std::stack<std::unique_ptr<State>>& states);
     virtual ~State();
 
     const bool& getQuit() const;
@@ -22,7 +22,7 @@ protected:
     virtual void updateMousePositions();
 
 protected:
-    std::stack<State*>* states_;
+    std::stack<std::unique_ptr<State>>& states_;
     sf::RenderWindow* window_;
     std::map<std::string, int>* supportedKeys_;
     std::map<std::string, int> keybinds_;

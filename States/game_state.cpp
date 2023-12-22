@@ -2,14 +2,14 @@
 
 GameState::GameState(sf::RenderWindow* window,
                      std::map<std::string, int>* supportedKeys,
-                     std::stack<State*>* states)
+                     std::stack<std::unique_ptr<State>>& states)
     : State(window, supportedKeys, states) {
-    pmenu_ = nullptr;
+    gameState_ = EndGameMenu::NONE;
     initKeybinds();
     initFonts();
     initTextures();
     initSounds();
-    initPauseMenu();
+    initMenus();
     initMap();
     initControl();
     initSub();
@@ -110,10 +110,14 @@ void GameState::initSounds() {
     }
 }
 
-void GameState::initPauseMenu() {
+void GameState::initMenus() {
     pmenu_ = std::make_unique<PauseMenu>(*window_, font_);
 
-    pmenu_->addButton("EXIT_STATE", static_cast<float>(window_->getSize().y) - 200.f, "Quit");
+    pmenu_->addButton("PAUSE_EXIT_STATE", static_cast<float>(window_->getSize().y) - 200.f, "Quit");
+
+    emenu_ = std::make_unique<EndGameMenu>(*window_, font_);
+
+    emenu_->addButton("END_EXIT_STATE", static_cast<float>(window_->getSize().y) - 200.f, "Quit");
 }
 
 void GameState::initSub() {
@@ -167,16 +171,19 @@ void GameState::update(const float& dt) {
     updateMousePositions();
     updateInput(dt);
 
-    if (!paused_) {
+    if (!paused_ && gameState_ == EndGameMenu::NONE) {
         updatePlayerInput(dt);
         sub_->update(dt, mousePosView_);
-        if (sub_->endGameSignal()) {
-            endState();
-        }
+        gameState_ = sub_->getEndState();
         sonar_->update(dt);
     } else {
-        pmenu_->update(mousePosView_);
-        updatePauseMenuGui();
+        if (gameState_ != EndGameMenu::NONE) {
+            emenu_->setState(gameState_);
+            emenu_->update(mousePosView_);
+        } else {
+            pmenu_->update(mousePosView_);
+        }
+        updateMenusGui();
     }
 }
 
@@ -189,7 +196,9 @@ void GameState::render(sf::RenderTarget* target) {
     control_->render(target);
     sub_->render(target);
 
-    if (paused_) {
+    if (gameState_ != EndGameMenu::NONE) {
+        emenu_->render(target);
+    } else if (paused_) {
         pmenu_->render(target);
     }
 }
@@ -214,8 +223,12 @@ void GameState::updateInput(const float &dt) {
     }
 }
 
-void GameState::updatePauseMenuGui() {
-    if (pmenu_->isButtonPressed("EXIT_STATE")) {
+void GameState::updateMenusGui() {
+    if (pmenu_->isButtonPressed("PAUSE_EXIT_STATE")) {
+        endState();
+    }
+
+    if (emenu_->isButtonPressed("END_EXIT_STATE")) {
         endState();
     }
 }

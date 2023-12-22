@@ -1,7 +1,7 @@
 #include "state.h"
 
 
-State::State(sf::RenderWindow *window, std::map<std::string, int>* supportedKeys, std::stack<State*>* states)
+State::State(sf::RenderWindow *window, std::map<std::string, int>* supportedKeys, std::stack<std::unique_ptr<State>>& states)
     : window_(window), supportedKeys_(supportedKeys), states_(states) {
     quit_ = false;
     paused_ = false;

@@ -68,8 +68,16 @@ void MovementComponent::updateVelocity(const float &dt) {
     }
 }
 
-void MovementComponent::resetVelocity() {
-    velocity_ = sf::Vector2f(0, 0);
+void MovementComponent::resetVelocity(axis i, const float &dt) {
+    if (i == BOTH) {
+        velocity_ = sf::Vector2f(0, 0);
+    } else if (i == X) {
+        velocity_.x = 0;
+        velocity_.y -= acceleration_.x * 0.8f * dt;
+    } else {
+        velocity_.x -= acceleration_.y * 0.8f * dt;
+        velocity_.y = 0;
+    }
 }
 
 sf::Vector2f MovementComponent::getVelocity() const {

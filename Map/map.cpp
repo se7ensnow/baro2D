@@ -35,9 +35,7 @@ Map::Map(int32_t width, int32_t height, float squareSize,
     generateMap(randomFillPercent, startX, startY, finishX, finishY);
 }
 
-Map::~Map() {
-
-}
+Map::~Map() = default;
 
 const std::string &Map::getSeed() const {
     return seed_;

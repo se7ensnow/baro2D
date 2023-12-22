@@ -44,10 +44,12 @@ add_executable(baro2D
         UI/sonar.cpp
         UI/sonar.h
         Utils/sf_math.h
-        Utils/sf_shapes.h)
+        Utils/sf_shapes.h
+        UI/end_game_menu.cpp
+        UI/end_game_menu.h)
 
 target_link_libraries(baro2D PRIVATE sfml-graphics sfml-audio sfml-system sfml-window sfml-network)
-target_compile_features(baro2D PRIVATE cxx_std_17)
+target_compile_features(baro2D PRIVATE cxx_std_20)
 
 if(WIN32)
     add_custom_command(
